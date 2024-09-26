@@ -20,10 +20,10 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
 ## De fire udviklere bag PayPeek
 
-**Home** Caroline
-**Explore Opportunities** Martin
-**Upload** Alfred
-**LaborUnion** Robin
+- **Home** Caroline
+- **Explore Opportunities** Martin
+- **Upload** Alfred
+- **LaborUnion** Robin
 
 In the output, you'll find options to open the app in a
 
