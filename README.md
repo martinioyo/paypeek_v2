@@ -38,6 +38,8 @@ You can start developing by editing the files inside the **app** directory. This
 
 When you're ready, run:
 
+**BRUG KUN DENNE TIL AT RESETTE PROJEKTET**
+
 ```bash
 npm run reset-project
 ```
