@@ -9,35 +9,35 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { auth } from '@/config/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
-export default function LoginScreen() {
+export default function SignupScreen() {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleLogin = () => {
+    const handleSignup = () => {
         if (!email || !password) {
             Alert.alert('Error', 'Please enter email and password');
             return;
         }
 
-        signInWithEmailAndPassword(auth, email, password)
+        createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
-                // Signed in
-                console.log('User logged in:', userCredential.user);
+                // Signed up
+                console.log('User signed up:', userCredential.user);
                 // Redirect to UploadPayslip screen
                 router.replace('/(tabs)/UploadPayslip');
             })
             .catch((error) => {
                 console.error(error);
-                Alert.alert('Login Error', error.message);
+                Alert.alert('Signup Error', error.message);
             });
     };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Welcome to PayPeek</Text>
+            <Text style={styles.title}>Create an Account</Text>
             <TextInput
                 style={styles.input}
                 placeholder="Email"
@@ -55,15 +55,15 @@ export default function LoginScreen() {
                 value={password}
                 onChangeText={(text) => setPassword(text)}
             />
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Login</Text>
+            <TouchableOpacity style={styles.button} onPress={handleSignup}>
+                <Text style={styles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
             <TouchableOpacity
-                onPress={() => router.push('/Signup')}
+                onPress={() => router.replace('/')}
                 style={styles.linkContainer}
             >
                 <Text style={styles.linkText}>
-                    Don't have an account? Sign Up
+                    Already have an account? Login
                 </Text>
             </TouchableOpacity>
         </View>
@@ -71,6 +71,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+    // Styles are similar to LoginScreen
     container: {
         flex: 1,
         padding: 20,
@@ -78,10 +79,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     title: {
-        fontSize: 38,
+        fontSize: 32,
         marginBottom: 40,
         alignSelf: 'center',
-        color: '#2c3e50',
+        color: '#fff',
         fontWeight: 'bold',
     },
     input: {
@@ -107,6 +108,5 @@ const styles = StyleSheet.create({
     linkText: {
         color: '#fff',
         textDecorationLine: 'underline',
-        fontWeight: 'bold',
     },
 });
