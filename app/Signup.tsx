@@ -27,7 +27,7 @@ export default function SignupScreen() {
                 // Signed up
                 console.log('User signed up:', userCredential.user);
                 // Redirect to UploadPayslip screen
-                router.replace('/(tabs)/UploadPayslip');
+                router.replace('/UserProfil');
             })
             .catch((error) => {
                 console.error(error);

@@ -73,10 +73,7 @@ const ProfessionSelectionScreen = () => {
     );
 
     return (
-        <LinearGradient
-            colors={['#6DD5FA', '#FFFFFF']}
-            style={styles.container}
-        >
+        <LinearGradient colors={['#6DD5FA', '#FFFFFF']} style={styles.container}>
             {!isConfirming ? (
                 <>
                     <Text style={styles.headerText}>Select a Profession</Text>
@@ -89,12 +86,15 @@ const ProfessionSelectionScreen = () => {
                     {isLoading ? (
                         <ActivityIndicator size="large" color="#3498db" />
                     ) : (
-                        <FlatList
-                            data={professions}
-                            renderItem={renderProfessionItem}
-                            keyExtractor={(item) => item.id}
-                            contentContainerStyle={styles.listContainer}
-                        />
+                        <View style={{ flex: 1, width: '100%' }}>
+                            <FlatList
+                                data={professions}
+                                renderItem={renderProfessionItem}
+                                keyExtractor={(item) => item.id}
+                                contentContainerStyle={styles.listContainer}
+                                showsVerticalScrollIndicator={false}
+                            />
+                        </View>
                     )}
                 </>
             ) : (
@@ -131,10 +131,8 @@ const ProfessionSelectionScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 40,
+        paddingHorizontal: 20,
         paddingVertical: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     headerText: {
         fontSize: 26,
@@ -160,15 +158,14 @@ const styles = StyleSheet.create({
     professionItem: {
         padding: 20,
         backgroundColor: '#fff',
-        borderRadius: 15, 
+        borderRadius: 15,
         marginVertical: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
         shadowRadius: 6,
         elevation: 3,
-        width: '90%', 
-        maxWidth: 700, 
+        width: '100%',
     },
     professionName: {
         fontSize: 20,
@@ -203,7 +200,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 6,
         elevation: 3,
- 
     },
     confirmText: {
         fontSize: 22,
@@ -237,8 +233,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     listContainer: {
-        paddingHorizontal: 20,
-        minWidth: '500px',
+        flexGrow: 1,
+        paddingBottom: 20,
     },
 });
 
