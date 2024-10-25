@@ -13,7 +13,11 @@ import { database } from '@/config/firebase';
 import globalStyles from '../styles/globalStyles';
 import Slider from '@react-native-community/slider';
 
+/* N.B - Comment out the map component here if you want to run the code in a browser environment
+For some reason the app crashes when the map component is imported in a browser environment
+But it works fine on the expo go app */
 import Map from '../../scripts/map';
+// ##################################################################
 
 const ProfessionSelectionScreen = () => {
     const [professions, setProfessions] = useState([]);

@@ -23,12 +23,57 @@ PayPeek is a modern, innovative platform that offers comprehensive insights and 
 
 **SCAN QR KODE FOR AT ÅBNE EXPO GO APPEN OG SE APPEN PÅ DIN TELEFON.**
 
+
+
+# Project Overview
+
+This project is organized into four main tabs, each developed by an individual contributor. Each developer managed their own primary tab and its associated files.
+
 ## The four developers behind PayPeek
 
 - **Home** Caroline
 - **Explore Opportunities** Martin
 - **Upload** Alfred
 - **LaborUnion** Robin
+
+### Home - Caroline
+Files:
+- `home.tsx`
+- `index.tsx`
+- `Signup.tsx`
+
+---
+
+### Explore Opportunities - Martin
+Files:
+- `explore.tsx`
+- `map.js`
+- `_layout.tsx`
+
+---
+
+### Upload - Alfred
+Files:
+- `UploadPayslip.tsx`
+- `SalarySummary.tsx`
+
+---
+
+### Labor Union - Robin
+Files:
+- `LaborUnion.tsx`
+- `ai_llm.js`
+
+---
+
+### Shared Components
+The following files were developed collaboratively:
+- `AuthContext.tsx`
+- `globalStyles.ts`
+- `config/firebase.js`
+
+
+
 
 In the output, you'll find options to open the app in a
 
