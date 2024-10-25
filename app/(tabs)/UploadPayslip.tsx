@@ -4,9 +4,11 @@ import {
     TouchableOpacity,
     Image,
     Alert,
-    StyleSheet,
     ActivityIndicator,
     View,
+    Modal,
+    FlatList,
+    StyleSheet,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { storage } from '@/config/firebase';
@@ -14,11 +16,16 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Buffer } from 'buffer';
+import globalStyles from '../styles/globalStyles';
 
 export default function UploadPayslip() {
     const [image, setImage] = useState<string | null>(null);
     const [uploading, setUploading] = useState(false);
     const router = useRouter();
+
+    const [blockchainModalVisible, setBlockchainModalVisible] = useState(false);
+    const [selectedBlockchain, setSelectedBlockchain] = useState<string | null>(null);
+    const [fakeHash, setFakeHash] = useState<string | null>(null);
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -92,77 +99,155 @@ export default function UploadPayslip() {
         }
     };
 
+    const generateFakeHash = (blob: Blob): string => {
+        // For illustration, generate a random hex string
+        const chars = 'abcdef0123456789';
+        let hash = '';
+        for (let i = 0; i < 64; i++) {
+            // this generates a random number
+            hash += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return hash;
+    };
+
+    const uploadFakeHash = async (blockchain: string) => {
+        if (!image) {
+            Alert.alert('Please select an image first');
+            return;
+        }
+
+        setUploading(true);
+
+        try {
+            const response = await fetch(image);
+            const blob = await response.blob();
+
+            // Generate a fake hash code
+            const hashCode = generateFakeHash(blob);
+
+            setFakeHash(hashCode);
+
+            Alert.alert('Document hash uploaded to ' + blockchain);
+
+            // Navigate to Salary Summary screen using router.push
+            router.push({
+                pathname: '/SalarySummary',
+                params: { fakeHash: hashCode, blockchain },
+            });
+        } catch (error) {
+            console.error(error);
+            Alert.alert('Error uploading document hash');
+        } finally {
+            setUploading(false);
+        }
+    };
+
     return (
         <LinearGradient
-            colors={['#A1CEDC', '#FFFFFF']}
-            style={styles.container}
+            colors={['#6DD5FA', '#FFFFFF']}
+            style={globalStyles.container}
         >
-            <Text style={styles.title}>Upload Your Payslip</Text>
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.button} onPress={pickImage}>
-                    <Text style={styles.buttonText}>Pick an Image from Gallery</Text>
+            <Text style={globalStyles.title}>Upload Your Payslip</Text>
+            <View >
+                <TouchableOpacity style={globalStyles.button} onPress={pickImage}>
+                    <Text style={globalStyles.buttonText}>Pick an Image from Gallery</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={takePhoto}>
-                    <Text style={styles.buttonText}>Take a Photo</Text>
+                <TouchableOpacity style={globalStyles.button} onPress={takePhoto}>
+                    <Text style={globalStyles.buttonText}>Take a Photo</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={uploadImage}>
-                    <Text style={styles.buttonText}>Submit Payslip</Text>
+                <TouchableOpacity style={globalStyles.button} onPress={uploadImage}>
+                    <Text style={globalStyles.buttonText}>Submit Payslip</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={globalStyles.button} onPress={() => setBlockchainModalVisible(true)}>
+                    <Text style={globalStyles.buttonText}>Choose Blockchain</Text>
                 </TouchableOpacity>
             </View>
-            {image && <Image source={{ uri: image }} style={styles.image} />}
+            {image && <Image source={{ uri: image }} style={globalStyles.uploadImage} />}
             {uploading && (
-                <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
+                <ActivityIndicator size="large" color="#0000ff" style={globalStyles.uploadLoader} />
             )}
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={blockchainModalVisible}
+                onRequestClose={() => {
+                    setBlockchainModalVisible(!blockchainModalVisible);
+                }}
+            >
+                <View style={styles.modalBackground}>
+                    <View style={styles.modalView}>
+                        <Text style={globalStyles.title}>Select a Blockchain</Text>
+                        <FlatList
+                            data={['Ethereum', 'Bitcoin', 'Polygon', 'Binance Smart Chain']}
+                            keyExtractor={(item) => item}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    style={styles.blockchainButton}
+                                    onPress={() => {
+                                        setSelectedBlockchain(item);
+                                        setBlockchainModalVisible(false);
+                                        uploadFakeHash(item);
+                                    }}
+                                >
+                                    <Text style={styles.blockchainButtonText}>{item}</Text>
+                                </TouchableOpacity>
+                            )}
+                        />
+                        <TouchableOpacity
+                            style={styles.modalCancelButton}
+                            onPress={() => setBlockchainModalVisible(false)}
+                        >
+                            <Text style={styles.modalButtonText}>Cancel</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </LinearGradient>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    modalBackground: {
         flex: 1,
-        padding: 20,
-        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
-    },
-    title: {
-        fontSize: 26,
-        marginBottom: 20,
-        fontWeight: '600',
-        color: '#2c3e50',
-        textAlign: 'center',
-    },
-    buttonContainer: {
-        width: '100%',
         alignItems: 'center',
     },
-    button: {
+    modalView: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 20,
+        width: '80%',
+        alignItems: 'center',
+        elevation: 5,
+    },
+    blockchainButton: {
         backgroundColor: '#3498db',
         paddingVertical: 12,
         paddingHorizontal: 20,
         borderRadius: 8,
         marginVertical: 8,
-        width: '80%',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 5,
+        width: '100%',
     },
-    buttonText: {
+    blockchainButtonText: {
         color: '#fff',
         fontSize: 16,
-        fontWeight: '500',
+        fontWeight: '600',
     },
-    image: {
-        width: 250,
-        height: 250,
-        marginVertical: 20,
+    modalCancelButton: {
+        backgroundColor: '#e74c3c',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
         borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#ddd',
+        marginTop: 16,
+        alignItems: 'center',
+        width: '100%',
     },
-    loader: {
-        marginTop: 20,
+    modalButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });

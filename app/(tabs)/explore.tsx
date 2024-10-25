@@ -5,18 +5,25 @@ import {
     Text,
     TouchableOpacity,
     FlatList,
-    StyleSheet,
     ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getDatabase, ref, onValue } from 'firebase/database';
 import { database } from '@/config/firebase';
+import globalStyles from '../styles/globalStyles';
+import Slider from '@react-native-community/slider';
+
+import Map from '../../scripts/map';
 
 const ProfessionSelectionScreen = () => {
     const [professions, setProfessions] = useState([]);
     const [selectedProfession, setSelectedProfession] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isConfirming, setIsConfirming] = useState(false);
+    const [mapOpen, setMapOpen] = useState(false);
+    const [selectedLocation, setSelectedLocation] = useState(null);
+    const [sliderOpen, setSliderOpen] = useState(false); // New state for slider visibility
+    const [sliderValue, setSliderValue] = useState(0); // New state for slider value
 
     // Fetch professions from Firebase
     const fetchProfessions = () => {
@@ -56,33 +63,88 @@ const ProfessionSelectionScreen = () => {
     // Render a single profession item
     const renderProfessionItem = ({ item }) => (
         <TouchableOpacity
-            style={styles.professionItem}
+            style={globalStyles.professionItem}
             onPress={() => handleSelectProfession(item)}
         >
-            <Text style={styles.professionName}>{item.name}</Text>
-            <Text style={styles.professionDetails}>
+            <Text style={globalStyles.professionName}>{item.name}</Text>
+            <Text style={globalStyles.professionDetails}>
                 Average Salary: ${item.averageSalary}
             </Text>
             <TouchableOpacity
-                style={styles.selectButton}
+                style={globalStyles.selectButton}
                 onPress={() => handleSelectProfession(item)}
             >
-                <Text style={styles.buttonText}>Select</Text>
+                <Text style={globalStyles.buttonText}>Select</Text>
             </TouchableOpacity>
         </TouchableOpacity>
     );
 
+    const handleLocationSelect = (location) => {
+        setSelectedLocation(location);
+        setMapOpen(false);
+    };
+
     return (
-        <LinearGradient colors={['#6DD5FA', '#FFFFFF']} style={styles.container}>
+        <LinearGradient
+            colors={['#6DD5FA', '#FFFFFF']}
+            style={globalStyles.container}
+        >
             {!isConfirming ? (
                 <>
-                    <Text style={styles.headerText}>Select a Profession</Text>
+                    <Text style={globalStyles.title}>
+                        Select your Profession
+                    </Text>
                     <TouchableOpacity
-                        style={styles.viewButton}
+                        style={globalStyles.button}
                         onPress={fetchProfessions}
                     >
-                        <Text style={styles.buttonText}>Select Profession</Text>
+                        <Text style={globalStyles.buttonText}>
+                            Select Profession
+                        </Text>
                     </TouchableOpacity>
+                    <TouchableOpacity
+                        style={globalStyles.button}
+                        onPress={() => setSliderOpen(!sliderOpen)}
+                    >
+                        <Text style={globalStyles.buttonText}>
+                            Choose Salary Range
+                        </Text>
+                    </TouchableOpacity>
+
+                    {sliderOpen && (
+                        <View style={{ alignItems: 'center' }}>
+                            <Slider
+                                style={{ width: 200, height: 40 }}
+                                minimumValue={0}
+                                maximumValue={100000}
+                                minimumTrackTintColor="#FFFFFF"
+                                maximumTrackTintColor="#000000"
+                                onValueChange={setSliderValue}
+                            />
+                            <Text>
+                                Selected Salary: ${sliderValue.toFixed(0)}
+                            </Text>
+                        </View>
+                    )}
+
+                    <TouchableOpacity
+                        style={globalStyles.button}
+                        onPress={() => setMapOpen(true)}
+                    >
+                        <Text style={globalStyles.buttonText}>
+                            Choose Location from map
+                        </Text>
+                    </TouchableOpacity>
+
+                    {mapOpen && <Map onLocationSelect={handleLocationSelect} />}
+
+                    {selectedLocation && (
+                        <Text style={globalStyles.locationText}>
+                            Selected Location: {selectedLocation.latitude},{' '}
+                            {selectedLocation.longitude}
+                        </Text>
+                    )}
+
                     {isLoading ? (
                         <ActivityIndicator size="large" color="#3498db" />
                     ) : (
@@ -91,35 +153,37 @@ const ProfessionSelectionScreen = () => {
                                 data={professions}
                                 renderItem={renderProfessionItem}
                                 keyExtractor={(item) => item.id}
-                                contentContainerStyle={styles.listContainer}
+                                contentContainerStyle={
+                                    globalStyles.listContainer
+                                }
                                 showsVerticalScrollIndicator={false}
                             />
                         </View>
                     )}
                 </>
             ) : (
-                <View style={styles.confirmContainer}>
-                    <Text style={styles.confirmText}>
+                <View style={globalStyles.confirmContainer}>
+                    <Text style={globalStyles.confirmText}>
                         Confirm your selection:
                     </Text>
-                    <Text style={styles.professionName}>
-                        {selectedProfession.name}
+                    <Text style={globalStyles.professionName}>
+                        {selectedProfession?.name}
                     </Text>
-                    <Text style={styles.professionDetails}>
-                        Average Salary: ${selectedProfession.averageSalary}
+                    <Text style={globalStyles.professionDetails}>
+                        Average Salary: ${selectedProfession?.averageSalary}
                     </Text>
-                    <View style={styles.confirmButtonsContainer}>
+                    <View style={globalStyles.confirmButtonsContainer}>
                         <TouchableOpacity
-                            style={styles.confirmButton}
+                            style={globalStyles.confirmButton}
                             onPress={handleConfirmSelection}
                         >
-                            <Text style={styles.buttonText}>CONFIRM</Text>
+                            <Text style={globalStyles.buttonText}>CONFIRM</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={styles.cancelButton}
+                            style={globalStyles.cancelButton}
                             onPress={() => setIsConfirming(false)}
                         >
-                            <Text style={styles.buttonText}>CANCEL</Text>
+                            <Text style={globalStyles.buttonText}>CANCEL</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -127,115 +191,5 @@ const ProfessionSelectionScreen = () => {
         </LinearGradient>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: 20,
-        paddingVertical: 20,
-    },
-    headerText: {
-        fontSize: 26,
-        fontWeight: 'bold',
-        color: '#2c3e50',
-        marginBottom: 20,
-        textAlign: 'center',
-        paddingTop: '10%',
-    },
-    viewButton: {
-        backgroundColor: '#3498db',
-        paddingVertical: 15,
-        paddingHorizontal: 30,
-        borderRadius: 30,
-        marginBottom: 20,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 5,
-    },
-    professionItem: {
-        padding: 20,
-        backgroundColor: '#fff',
-        borderRadius: 15,
-        marginVertical: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 3,
-        width: '100%',
-    },
-    professionName: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 8,
-        color: '#34495e',
-    },
-    professionDetails: {
-        fontSize: 16,
-        color: '#7f8c8d',
-        marginBottom: 10,
-    },
-    selectButton: {
-        backgroundColor: '#3498db',
-        paddingVertical: 10,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    confirmContainer: {
-        alignItems: 'center',
-        padding: 20,
-        backgroundColor: '#fff',
-        borderRadius: 15,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 3,
-    },
-    confirmText: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        marginBottom: 15,
-        color: '#2c3e50',
-        textAlign: 'center',
-    },
-    confirmButtonsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        marginTop: 20,
-    },
-    confirmButton: {
-        backgroundColor: '#27ae60',
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        flex: 1,
-        marginRight: 10,
-        alignItems: 'center',
-    },
-    cancelButton: {
-        backgroundColor: '#e74c3c',
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        flex: 1,
-        marginLeft: 10,
-        alignItems: 'center',
-    },
-    listContainer: {
-        flexGrow: 1,
-        paddingBottom: 20,
-    },
-});
 
 export default ProfessionSelectionScreen;

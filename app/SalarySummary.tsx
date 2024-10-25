@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Button, Image, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Buffer } from 'buffer'; // Import Buffer
+import globalStyles from './styles/globalStyles';
 
 export default function SalarySummary() {
-    const { imageUrl: encodedImageUrl } = useLocalSearchParams<{ imageUrl: string }>();
+    const router = useRouter();
+    const { imageUrl: encodedImageUrl, fakeHash, blockchain } = useLocalSearchParams<{
+        imageUrl: string;
+        fakeHash: string;
+        blockchain: string;
+    }>();
 
     // **Decode the imageUrl from base64**
     const imageUrl = encodedImageUrl
@@ -24,18 +30,25 @@ export default function SalarySummary() {
 
     return (
         <LinearGradient
-            colors={['#e6f0f5', '#FFFFFF']}
-            style={styles.container}
+            colors={['#6DD5FA', '#FFFFFF']}
+            style={globalStyles.container}
         >
-            <Text style={styles.title}>Salary Summary</Text>
+            <Text style={globalStyles.title}>Salary Summary</Text>
             {imageUrl && (
                 <Image source={{ uri: imageUrl }} style={styles.image} />
+            )}
+            {fakeHash && (
+                <View style={styles.hashContainer}>
+                    <Text style={styles.hashTitle}>Blockchain: {blockchain}</Text>
+                    <Text style={styles.hashText}>Document Hash:</Text>
+                    <Text style={styles.hashValue}>{fakeHash}</Text>
+                </View>
             )}
             <View style={styles.table}>
                 {Object.entries(salaryData).map(([key, value]) => (
                     <View key={key} style={styles.tableRow}>
                         <Text style={styles.tableKey}>{key}</Text>
-                        <Text style={styles.tableValue}>{value}</Text>
+                        <Text style={globalStyles.bodyText}>{value}</Text>
                     </View>
                 ))}
             </View>
@@ -44,6 +57,7 @@ export default function SalarySummary() {
                 onPress={() => {
                     // Handle proceed action
                     Alert.alert('Proceeding to the next step...');
+                    router.replace('/home');
                 }}
             />
         </LinearGradient>
@@ -51,22 +65,12 @@ export default function SalarySummary() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16,
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: 24,
-        marginVertical: 16,
-        fontWeight: 'bold',
-        color: '#333',
-    },
     image: {
         width: 250,
         height: 250,
         marginVertical: 16,
         borderRadius: 8,
+        alignSelf: 'center',
     },
     table: {
         width: '90%',
@@ -86,8 +90,27 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#555',
     },
-    tableValue: {
+    hashContainer: {
+        backgroundColor: '#fff',
+        padding: 16,
+        borderRadius: 8,
+        marginVertical: 16,
+        alignItems: 'center',
+    },
+    hashTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#2c3e50',
+        marginBottom: 8,
+    },
+    hashText: {
         fontSize: 16,
-        color: '#555',
+        color: '#2c3e50',
+    },
+    hashValue: {
+        fontSize: 14,
+        color: '#34495e',
+        marginTop: 8,
+        textAlign: 'center',
     },
 });

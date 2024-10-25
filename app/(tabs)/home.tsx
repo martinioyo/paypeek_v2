@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
     View,
     Text,
@@ -10,11 +10,26 @@ import {
 import { useRouter } from 'expo-router';
 import { auth } from '@/config/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import globalStyles from '../styles/globalStyles';
+import { AuthContext } from '../contexts/AuthContext';
 
 export default function LoginScreen() {
     const router = useRouter();
+    const { user } = useContext(AuthContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+ 
+    if (user) {
+       console.log('User logged in:', user);
+    } else {
+        console.log('User not logged in');
+    }
+
+    useEffect(() => {
+      if (user) {
+        router.replace('/UserProfil');
+      }
+    }, [user]);
 
     const handleLogin = () => {
         if (!email || !password) {
@@ -36,10 +51,10 @@ export default function LoginScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Welcome to PayPeek</Text>
+        <View style={globalStyles.container}>
+            <Text style={globalStyles.title}>Welcome to PayPeek</Text>
             <TextInput
-                style={styles.input}
+                style={globalStyles.input}
                 placeholder="Email"
                 placeholderTextColor="#aaa"
                 autoCapitalize="none"
@@ -48,65 +63,24 @@ export default function LoginScreen() {
                 onChangeText={(text) => setEmail(text)}
             />
             <TextInput
-                style={styles.input}
+                style={globalStyles.input}
                 placeholder="Password"
                 placeholderTextColor="#aaa"
                 secureTextEntry
                 value={password}
                 onChangeText={(text) => setPassword(text)}
             />
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Login</Text>
+            <TouchableOpacity style={globalStyles.button} onPress={handleLogin}>
+                <Text style={globalStyles.buttonText}>Login</Text>
             </TouchableOpacity>
             <TouchableOpacity
                 onPress={() => router.push('/Signup')}
-                style={styles.linkContainer}
+                style={globalStyles.linkContainer}
             >
-                <Text style={styles.linkText}>
+                <Text style={globalStyles.subtitle}>
                     Don't have an account? Sign Up
                 </Text>
             </TouchableOpacity>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-        backgroundColor: '#A1CEDC',
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: 38,
-        marginBottom: 40,
-        alignSelf: 'center',
-        color: '#2c3e50',
-        fontWeight: 'bold',
-    },
-    input: {
-        backgroundColor: '#fff',
-        padding: 15,
-        marginBottom: 15,
-        borderRadius: 8,
-    },
-    button: {
-        backgroundColor: '#1D3D47',
-        padding: 15,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginBottom: 15,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 16,
-    },
-    linkContainer: {
-        alignItems: 'center',
-    },
-    linkText: {
-        color: '#fff',
-        textDecorationLine: 'underline',
-        fontWeight: 'bold',
-    },
-});

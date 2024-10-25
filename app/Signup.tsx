@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
     View,
     Text,
@@ -10,15 +10,42 @@ import {
 import { useRouter } from 'expo-router';
 import { auth } from '@/config/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import globalStyles from './styles/globalStyles';
+import { AuthContext } from './contexts/AuthContext';
 
 export default function SignupScreen() {
     const router = useRouter();
+    const { user } = useContext(AuthContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    useEffect(() => {
+        if (user) {
+            router.replace('/(tabs)/UserProfil');
+        }
+    }, [user]);
 
     const handleSignup = () => {
         if (!email || !password) {
             Alert.alert('Error', 'Please enter email and password');
+            return;
+        }
+
+        // This regular expression pattern is used to validate email addresses.
+        // It ensures that the email follows the general format of "local-part@domain".
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // Check if the email address is valid
+        if (!emailPattern.test(email)) {
+            console.log('Invalid email');
+            Alert.alert('Error', 'Please enter a valid email address');
+            return;
+        }
+
+        // Check if the password is at least 6 characters long
+        if (password.length < 6) {
+            console.log('Password too short');
+            Alert.alert('Error', 'Password must be at least 6 characters long');
             return;
         }
 
@@ -36,10 +63,10 @@ export default function SignupScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Create an Account</Text>
+        <View style={globalStyles.container}>
+            <Text style={globalStyles.title}>Create an Account</Text>
             <TextInput
-                style={styles.input}
+                style={globalStyles.input}
                 placeholder="Email"
                 placeholderTextColor="#aaa"
                 autoCapitalize="none"
@@ -48,65 +75,27 @@ export default function SignupScreen() {
                 onChangeText={(text) => setEmail(text)}
             />
             <TextInput
-                style={styles.input}
+                style={globalStyles.input}
                 placeholder="Password"
                 placeholderTextColor="#aaa"
                 secureTextEntry
                 value={password}
                 onChangeText={(text) => setPassword(text)}
             />
-            <TouchableOpacity style={styles.button} onPress={handleSignup}>
-                <Text style={styles.buttonText}>Sign Up</Text>
+            <TouchableOpacity
+                style={globalStyles.button}
+                onPress={handleSignup}
+            >
+                <Text style={globalStyles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
             <TouchableOpacity
-                onPress={() => router.replace('/')}
-                style={styles.linkContainer}
+                onPress={() => router.push('/home')}
+                style={globalStyles.linkContainer}
             >
-                <Text style={styles.linkText}>
+                <Text style={globalStyles.subtitle}>
                     Already have an account? Login
                 </Text>
             </TouchableOpacity>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    // Styles are similar to LoginScreen
-    container: {
-        flex: 1,
-        padding: 20,
-        backgroundColor: '#A1CEDC',
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: 32,
-        marginBottom: 40,
-        alignSelf: 'center',
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    input: {
-        backgroundColor: '#fff',
-        padding: 15,
-        marginBottom: 15,
-        borderRadius: 8,
-    },
-    button: {
-        backgroundColor: '#1D3D47',
-        padding: 15,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginBottom: 15,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 16,
-    },
-    linkContainer: {
-        alignItems: 'center',
-    },
-    linkText: {
-        color: '#fff',
-        textDecorationLine: 'underline',
-    },
-});
