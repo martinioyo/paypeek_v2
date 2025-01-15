@@ -30,18 +30,33 @@ const ProfessionSelectionScreen = () => {
     const [sliderValue, setSliderValue] = useState(0); // New state for slider value
 
     // Fetch professions from Firebase
+    /**
+     * Fetches the list of professions from the database and updates the state.
+     *
+     * This function sets the loading state to true, retrieves the professions data from the database,
+     * transforms it into an array of profession objects, updates the state with the fetched data,
+     * and finally sets the loading state to false.
+     *
+     * The data is fetched only once due to the `onlyOnce` option in the `onValue` method.
+     */
     const fetchProfessions = () => {
+        console.log('Fetching professions...');
         setIsLoading(true);
         const dbRef = ref(database, 'professions');
         onValue(
             dbRef,
             (snapshot) => {
+                console.log('Data fetched from database');
                 const data = snapshot.val();
-                const professionArray = Object.keys(data).map((key) => ({
-                    id: key,
-                    ...data[key],
-                }));
-                setProfessions(professionArray);
+                if (data) {
+                    const professionArray = Object.keys(data).map((key) => ({
+                        id: key,
+                        ...data[key],
+                    }));
+                    setProfessions(professionArray);
+                } else {
+                    console.log('No data available');
+                }
                 setIsLoading(false);
             },
             {
